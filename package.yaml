@@ -21,6 +21,8 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- gloss >= 1.13.1.1 && < 14
+- unordered-containers
 
 ghc-options:
 - -Wall
@@ -44,6 +46,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -main-is Main
     dependencies:
     - Game-of-life
 
