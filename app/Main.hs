@@ -123,10 +123,11 @@ drawGrid (Game {camera = camera, screenSize = screenSize}) = pictures
 drawGame :: Game -> Picture
 drawGame game = pictures [ color black $ drawCells game
                          , if showGrid game then color black $ drawGrid game else Blank
-                         , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText]
+                         , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
+                         ]
                          where gameStateText = case paused game of
-                               False -> ""
-                               True  -> "Pause"
+                                 False -> ""
+                                 True  -> "Pause"
                                (width, height) = fromIntegral <$> screenSize game
                                halfWidth = fromIntegral width / 2.0
                                halfHeight = fromIntegral height / 2.0
@@ -141,8 +142,8 @@ gameInteract (EventKey (Char key) keyState _ _) game =
          's' -> game {camera = gameCamera {deltaY    = if keyState == Down then -moveSpeed else 0.0}}
          'a' -> game {camera = gameCamera {deltaX    = if keyState == Down then -moveSpeed else 0.0}}
          'd' -> game {camera = gameCamera {deltaX    = if keyState == Down then  moveSpeed else 0.0}}
-         '1' -> game {camera = gameCamera {deltaZoom = if keyState == Down then  zoomSpeed else 0.0}}
-         '2' -> game {camera = gameCamera {deltaZoom = if keyState == Down then -zoomSpeed else 0.0}}
+         '+' -> game {camera = gameCamera {deltaZoom = if keyState == Down then  zoomSpeed else 0.0}}
+         '-' -> game {camera = gameCamera {deltaZoom = if keyState == Down then -zoomSpeed else 0.0}}
          'g' -> if keyState == Down then game {showGrid = not $ showGrid game} else game
          'r' -> if keyState == Down then game {board = HS.empty, paused = True} else game
          _   -> game
@@ -189,7 +190,7 @@ newGame :: Game
 newGame = Game { board  = HS.empty
                , camera = Camera { x = 0.0,    deltaX = 0.0
                                  , y = 0.0,    deltaY = 0.0
-                                 , zoom = 1.0, deltaZoom = 0.0}
+                                 , zoom = 3.0, deltaZoom = 0.0}
                , paused = True
                , showGrid = True
                , screenSize = defaultScreenSize}
@@ -199,7 +200,7 @@ title :: String
 title = "Conway's game of life"
 
 defaultScreenSize :: (Int, Int)
-defaultScreenSize = (600, 600)
+defaultScreenSize = (800, 600)
 
 backgroundColor :: Color
 backgroundColor = white
