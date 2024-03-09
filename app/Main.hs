@@ -150,11 +150,10 @@ newButton = Button { buttonX = fromIntegral (fst defaultScreenSize) / 2 - button
                    , buttonHeight = 40.0
                    }
 
-
 -- Функция отрисовки кнопки
-drawButton :: Button -> Picture
-drawButton (Button { buttonX = x, buttonY = y, buttonWidth = width, buttonHeight = height }) =
-    translate x y $
+drawButton :: Button -> (Int, Int) -> Picture
+drawButton (Button { buttonWidth = width, buttonHeight = height }) (screenWidth, screenHeight) =
+    translate (fromIntegral screenWidth / 2 - width / 2) (-fromIntegral screenHeight / 2 + height / 2) $
     color buttonColor $ rectangleSolid width height
     where buttonColor = green
 
@@ -173,7 +172,7 @@ drawGame game =
                 , if showGrid game then color black $ drawGrid game else Blank
                 , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
                 , drawPanel newPanel (screenSize game)
-                , drawButton newButton -- добавляем отрисовку кнопки
+                , drawButton newButton (screenSize game)
                 ]
     where gameStateText = case paused game of
                              False -> ""
