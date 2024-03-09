@@ -153,9 +153,10 @@ newButton = Button { buttonX = fromIntegral (fst defaultScreenSize) / 2 - button
 -- Функция отрисовки кнопки
 drawButton :: Button -> (Int, Int) -> Picture
 drawButton (Button { buttonWidth = width, buttonHeight = height }) (screenWidth, screenHeight) =
-    translate (fromIntegral screenWidth / 2 - width / 2) (-fromIntegral screenHeight / 2 + height / 2) $
+    translate 0 (-halfHeight + height / 2 + height + 10) $
     color buttonColor $ rectangleSolid width height
     where buttonColor = green
+          halfHeight = fromIntegral screenHeight / 2.0
 
 -- обработка нажатия кнопки
 handleButtonPress :: (Float, Float) -> Game -> Game
