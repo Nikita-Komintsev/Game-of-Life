@@ -139,9 +139,9 @@ drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, scr
 drawGame :: Game -> Picture
 drawGame game =
     pictures [ color black $ drawCells game
-                , drawPanel newPanel (screenSize game)  -- Отрисовка панели
                 , if showGrid game then color black $ drawGrid game else Blank
                 , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
+                , drawPanel newPanel (screenSize game)
                 ]
     where gameStateText = case paused game of
                              False -> ""
