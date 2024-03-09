@@ -128,12 +128,26 @@ data Panel = Panel { panelWidth :: Float, panelHeight :: Float }
 newPanel :: Panel
 newPanel = Panel { panelWidth = fromIntegral $ fst defaultScreenSize, panelHeight = 150.0 }
 
+-- TO DO
 -- Функция отрисовки панели
 drawPanel :: Panel -> (Int, Int) -> Picture
 drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, screenHeight) =
-    translate 0 (-halfHeight + height / 2) $
-    color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
+    pictures [ translate 0 (-halfHeight + height / 2) $ color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
+             , translate (-halfWidth + 10) (-halfHeight + height / 2 + 40) $ button "+" "Увеличить зум"
+             , translate (-halfWidth + 10 + 80) (-halfHeight + height / 2 + 40) $ button "-" "Уменьшить зум"
+             , translate (-halfWidth + 10 + 80 * 2) (-halfHeight + height / 2 + 40) $ button " " "Старт / Стоп"
+             , translate (-halfWidth + 10 + 80 * 3) (-halfHeight + height / 2 + 40) $ button "g" "Показать сетку"
+             , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 + 40) $ button "r" "Очистить поле"
+             ]
     where halfHeight = fromIntegral screenHeight / 2.0
+          halfWidth = fromIntegral screenWidth / 2.0
+          button :: String -> String -> Picture
+          button symbol text =
+              pictures [ color (greyN 0.7) $ rectangleSolid 70 30
+                       , translate (-10) (-5) $ scale 0.1 0.1 $ color black $ Text symbol
+                       , translate (-40) (-10) $ scale 0.1 0.1 $ color black $ Text text
+                       ]
+
 
 -- отрисовка экземпляра игры
 drawGame :: Game -> Picture
@@ -185,7 +199,7 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
                   then if not $ mouseToCellCoordinates `HS.member` board game
                        then game { board = HS.insert mouseToCellCoordinates (board game) }
                        else game { board = HS.delete mouseToCellCoordinates (board game) }
-                  else game
+                  else processButtonClick game position
     _          -> game
   where mouseToCellCoordinates :: Cell
         mouseToCellCoordinates =
@@ -198,6 +212,30 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
         isPanelClick (xPos, yPos) = yPos < -halfHeight + panelHeight newPanel
         (width, height) = fromIntegral <$> screenSize game
         halfHeight = fromIntegral height / 2.0
+        -- Обработка нажатия на кнопки на панели
+        processButtonClick :: Game -> (Float, Float) -> Game
+        processButtonClick game (clickX, clickY)
+          | clickX <= -halfWidth + 10 + 80 = handleButtonAction game "+"  -- Нажата кнопка увеличения зума
+          | clickX <= -halfWidth + 10 + 80 * 2 = handleButtonAction game "-"  -- Нажата кнопка уменьшения зума
+          | clickX <= -halfWidth + 10 + 80 * 3 = handleButtonAction game " "  -- Нажата кнопка старт / стоп
+          | clickX <= -halfWidth + 10 + 80 * 4 = handleButtonAction game "g"  -- Нажата кнопка показа сетки
+          | clickX <= -halfWidth + 10 + 80 * 5 = handleButtonAction game "r"  -- Нажата кнопка очистки поля
+          | otherwise = game  -- Нажатие было вне панели, игнорируем его
+          where halfWidth = fromIntegral (fst (screenSize game)) / 2.0
+                handleButtonAction :: Game -> String -> Game
+                handleButtonAction game buttonSymbol =
+                  case buttonSymbol of
+                    "+" -> -- Действия при нажатии на кнопку увеличения зума
+                          game { camera = gameCamera { deltaZoom = 1 } }
+                    "-" -> -- Действия при нажатии на кнопку уменьшения зума
+                          game { camera = gameCamera { deltaZoom = -1 } }
+                    " " -> -- Действия при нажатии на кнопку старт / стоп
+                          game { paused = not $ paused game }
+                    "g" -> -- Действия при нажатии на кнопку показа сетки
+                          game { showGrid = not $ showGrid game }
+                    "r" -> -- Действия при нажатии на кнопку очистки поля
+                          game { board = HS.empty, paused = True }
+                    _   -> game  -- Действия для остальных кнопок, если такие будут добавлены
 gameInteract (EventResize newScreenSize) game = game {screenSize = newScreenSize}
 gameInteract _ game = game
 
