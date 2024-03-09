@@ -135,6 +135,36 @@ drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, scr
     color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
     where halfHeight = fromIntegral screenHeight / 2.0
 
+-- Тип данных для кнопки
+data Button = Button { buttonX :: Float
+                     , buttonY :: Float
+                     , buttonWidth :: Float
+                     , buttonHeight :: Float
+                     }
+
+-- Определение кнопки в новой игре
+newButton :: Button
+newButton = Button { buttonX = fromIntegral (fst defaultScreenSize) / 2 - buttonWidth newButton / 2
+                   , buttonY = -fromIntegral (snd defaultScreenSize) / 2 + buttonHeight newButton / 2
+                   , buttonWidth = 100.0
+                   , buttonHeight = 40.0
+                   }
+
+
+-- Функция отрисовки кнопки
+drawButton :: Button -> Picture
+drawButton (Button { buttonX = x, buttonY = y, buttonWidth = width, buttonHeight = height }) =
+    translate x y $
+    color buttonColor $ rectangleSolid width height
+    where buttonColor = green
+
+-- обработка нажатия кнопки
+handleButtonPress :: (Float, Float) -> Game -> Game
+handleButtonPress (xPos, yPos) game
+    | xPos >= buttonX newButton && xPos <= buttonX newButton + buttonWidth newButton &&
+      yPos >= buttonY newButton && yPos <= buttonY newButton + buttonHeight newButton =
+          game { paused = not $ paused game }
+    | otherwise = game
 
 -- отрисовка экземпляра игры
 drawGame :: Game -> Picture
@@ -202,39 +232,6 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
         halfHeight = fromIntegral height / 2.0
 gameInteract (EventResize newScreenSize) game = game {screenSize = newScreenSize}
 gameInteract _ game = game
-
--- Тип данных для кнопки
-data Button = Button { buttonX :: Float
-                     , buttonY :: Float
-                     , buttonWidth :: Float
-                     , buttonHeight :: Float
-                     }
-
--- Определение кнопки в новой игре
-newButton :: Button
-newButton = Button { buttonX = fromIntegral (fst defaultScreenSize) / 2 - buttonWidth newButton / 2
-                   , buttonY = -fromIntegral (snd defaultScreenSize) / 2 + buttonHeight newButton / 2
-                   , buttonWidth = 100.0
-                   , buttonHeight = 40.0
-                   }
-
-
--- Функция отрисовки кнопки
-drawButton :: Button -> Picture
-drawButton (Button { buttonX = x, buttonY = y, buttonWidth = width, buttonHeight = height }) =
-    translate x y $
-    color buttonColor $ rectangleSolid width height
-    where buttonColor = green
-
--- обработка нажатия кнопки
-handleButtonPress :: (Float, Float) -> Game -> Game
-handleButtonPress (xPos, yPos) game
-    | xPos >= buttonX newButton && xPos <= buttonX newButton + buttonWidth newButton &&
-      yPos >= buttonY newButton && yPos <= buttonY newButton + buttonHeight newButton =
-          game { paused = not $ paused game }
-    | otherwise = game
-
-
 
 -- игровое состояние
 data Game = Game { board      :: Board
