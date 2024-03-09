@@ -135,37 +135,6 @@ drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, scr
     color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
     where halfHeight = fromIntegral screenHeight / 2.0
 
--- Тип данных для кнопки
-data Button = Button { buttonX :: Float
-                     , buttonY :: Float
-                     , buttonWidth :: Float
-                     , buttonHeight :: Float
-                     }
-
--- Определение кнопки в новой игре
-newButton :: Button
-newButton = Button { buttonX = fromIntegral (fst defaultScreenSize) / 2 - buttonWidth newButton / 2
-                   , buttonY = -fromIntegral (snd defaultScreenSize) / 2 + buttonHeight newButton / 2
-                   , buttonWidth = 100.0
-                   , buttonHeight = 40.0
-                   }
-
--- Функция отрисовки кнопки
-drawButton :: Button -> (Int, Int) -> Picture
-drawButton (Button { buttonWidth = width, buttonHeight = height }) (screenWidth, screenHeight) =
-    translate 0 (-halfHeight + height / 2 + height + 10) $
-    color buttonColor $ rectangleSolid width height
-    where buttonColor = green
-          halfHeight = fromIntegral screenHeight / 2.0
-
--- обработка нажатия кнопки
-handleButtonPress :: (Float, Float) -> Game -> Game
-handleButtonPress (xPos, yPos) game
-    | xPos >= buttonX newButton && xPos <= buttonX newButton + buttonWidth newButton &&
-      yPos >= buttonY newButton && yPos <= buttonY newButton + buttonHeight newButton =
-          game { paused = not $ paused game }
-    | otherwise = game
-
 -- отрисовка экземпляра игры
 drawGame :: Game -> Picture
 drawGame game =
@@ -173,7 +142,6 @@ drawGame game =
                 , if showGrid game then color black $ drawGrid game else Blank
                 , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
                 , drawPanel newPanel (screenSize game)
-                , drawButton newButton (screenSize game)
                 ]
     where gameStateText = case paused game of
                              False -> ""
@@ -217,7 +185,7 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
                   then if not $ mouseToCellCoordinates `HS.member` board game
                        then game { board = HS.insert mouseToCellCoordinates (board game) }
                        else game { board = HS.delete mouseToCellCoordinates (board game) }
-                  else handleButtonPress position game
+                  else game
     _          -> game
   where mouseToCellCoordinates :: Cell
         mouseToCellCoordinates =
