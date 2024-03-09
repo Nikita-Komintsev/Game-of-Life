@@ -120,10 +120,26 @@ drawGrid (Game {camera = camera, screenSize = screenSize}) = pictures
           verticalCameraOffset :: Float
           verticalCameraOffset = -(x camera `mod'` cellSize) * zoom camera
 
+-- Тип данных для панели
+data Panel = Panel { panelWidth :: Float, panelHeight :: Float }
+
+-- Определение панели в новой игре
+newPanel :: Panel
+newPanel = Panel { panelWidth = fromIntegral $ fst defaultScreenSize, panelHeight = 150.0 }
+
+-- Функция отрисовки панели
+drawPanel :: Panel -> (Int, Int) -> Picture
+drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, screenHeight) =
+    translate 0 (-halfHeight + height / 2) $
+    color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
+    where halfHeight = fromIntegral screenHeight / 2.0
+
+
 -- отрисовка экземпляра игры
 drawGame :: Game -> Picture
 drawGame game =
     pictures [ color black $ drawCells game
+                , drawPanel newPanel (screenSize game)  -- Отрисовка панели
                 , if showGrid game then color black $ drawGrid game else Blank
                 , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
                 ]
@@ -164,18 +180,24 @@ gameInteract (EventKey (SpecialKey key) keyState _ _) game =
     where gameCamera :: Camera
           gameCamera = camera game
 gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
-    case mouseButton of
-         LeftButton -> if not $ mouseToCellCoordinates `HS.member` board game
-             then game {board = HS.insert mouseToCellCoordinates (board game)}
-             else game {board = HS.delete mouseToCellCoordinates (board game)}
-         _          -> game
-    where mouseToCellCoordinates :: Cell
-          mouseToCellCoordinates =
-              ( floor $ (fst position / zoom gameCamera + x gameCamera) / cellSize + 1.0
-              , floor $ (snd position / zoom gameCamera + y gameCamera) / cellSize + 1.0)
+  case mouseButton of
+    LeftButton -> if not $ isPanelClick position
+                  then if not $ mouseToCellCoordinates `HS.member` board game
+                       then game { board = HS.insert mouseToCellCoordinates (board game) }
+                       else game { board = HS.delete mouseToCellCoordinates (board game) }
+                  else game
+    _          -> game
+  where mouseToCellCoordinates :: Cell
+        mouseToCellCoordinates =
+          ( floor $ (fst position / zoom gameCamera + x gameCamera) / cellSize + 1.0
+          , floor $ (snd position / zoom gameCamera + y gameCamera) / cellSize + 1.0)
 
-          gameCamera :: Camera
-          gameCamera = camera game
+        gameCamera :: Camera
+        gameCamera = camera game
+        isPanelClick :: (Float, Float) -> Bool
+        isPanelClick (xPos, yPos) = yPos < -halfHeight + panelHeight newPanel
+        (width, height) = fromIntegral <$> screenSize game
+        halfHeight = fromIntegral height / 2.0
 gameInteract (EventResize newScreenSize) game = game {screenSize = newScreenSize}
 gameInteract _ game = game
 
