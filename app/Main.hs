@@ -6,6 +6,7 @@ import Graphics.Gloss.Interface.IO.Interact
 import Data.List as L
 import Data.Fixed
 import Data.HashSet as HS
+import Graphics.Gloss.Interface.Pure.Game
 
 --ячейка на доске
 type Cell = (Int, Int)
@@ -121,16 +122,17 @@ drawGrid (Game {camera = camera, screenSize = screenSize}) = pictures
 
 -- отрисовка экземпляра игры
 drawGame :: Game -> Picture
-drawGame game = pictures [ color black $ drawCells game
-                         , if showGrid game then color black $ drawGrid game else Blank
-                         , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
-                         ]
-                         where gameStateText = case paused game of
-                                 False -> ""
-                                 True  -> "Pause"
-                               (width, height) = fromIntegral <$> screenSize game
-                               halfWidth = fromIntegral width / 2.0
-                               halfHeight = fromIntegral height / 2.0
+drawGame game =
+    pictures [ color black $ drawCells game
+                , if showGrid game then color black $ drawGrid game else Blank
+                , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
+                ]
+    where gameStateText = case paused game of
+                             False -> ""
+                             True  -> "Pause"
+          (width, height) = fromIntegral <$> screenSize game
+          halfWidth = fromIntegral width / 2.0
+          halfHeight = fromIntegral height / 2.0
 
 
 
