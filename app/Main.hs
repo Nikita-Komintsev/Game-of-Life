@@ -133,8 +133,6 @@ newPanel = Panel { panelWidth = fromIntegral $ fst defaultScreenSize, panelHeigh
 drawPanel :: Panel -> (Int, Int) -> Picture
 drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, screenHeight) =
     pictures [ translate 0 (-halfHeight + height / 2) $ color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
-             , translate (-halfWidth + 10) (-halfHeight + height / 2 + 40) $ button "+" "Увеличить зум"
-             , translate (-halfWidth + 10 + 80) (-halfHeight + height / 2 + 40) $ button "-" "Уменьшить зум"
              , translate (-halfWidth + 10 + 80 * 2) (-halfHeight + height / 2 + 40) $ button " " "Старт / Стоп"
              , translate (-halfWidth + 10 + 80 * 3) (-halfHeight + height / 2 + 40) $ button "g" "Показать сетку"
              , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 + 40) $ button "r" "Очистить поле"
@@ -215,27 +213,21 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
         -- Обработка нажатия на кнопки на панели
         processButtonClick :: Game -> (Float, Float) -> Game
         processButtonClick game (clickX, clickY)
-          | clickX <= -halfWidth + 10 + 80 = handleButtonAction game "+"  -- Нажата кнопка увеличения зума
-          | clickX <= -halfWidth + 10 + 80 * 2 = handleButtonAction game "-"  -- Нажата кнопка уменьшения зума
-          | clickX <= -halfWidth + 10 + 80 * 3 = handleButtonAction game " "  -- Нажата кнопка старт / стоп
-          | clickX <= -halfWidth + 10 + 80 * 4 = handleButtonAction game "g"  -- Нажата кнопка показа сетки
-          | clickX <= -halfWidth + 10 + 80 * 5 = handleButtonAction game "r"  -- Нажата кнопка очистки поля
-          | otherwise = game  -- Нажатие было вне панели, игнорируем его
-          where halfWidth = fromIntegral (fst (screenSize game)) / 2.0
+            | clickX <= (-halfWidth + 10 + 80 * 2) = handleButtonAction game " "  -- Нажата кнопка старт / стоп
+            | clickX <= (-halfWidth + 10 + 80 * 3) = handleButtonAction game "g"  -- Нажата кнопка показа сетки
+            | clickX <= (-halfWidth + 10 + 80 * 4) = handleButtonAction game "r"  -- Нажата кнопка очистки поля
+            | otherwise = game  -- Нажатие было вне панели, игнорируем его
+            where
+                halfWidth = fromIntegral (fst (screenSize game)) / 2.0
+                halfHeight = fromIntegral (snd (screenSize game)) / 2.0
                 handleButtonAction :: Game -> String -> Game
                 handleButtonAction game buttonSymbol =
-                  case buttonSymbol of
-                    "+" -> -- Действия при нажатии на кнопку увеличения зума
-                          game { camera = gameCamera { deltaZoom = 1 } }
-                    "-" -> -- Действия при нажатии на кнопку уменьшения зума
-                          game { camera = gameCamera { deltaZoom = -1 } }
-                    " " -> -- Действия при нажатии на кнопку старт / стоп
-                          game { paused = not $ paused game }
-                    "g" -> -- Действия при нажатии на кнопку показа сетки
-                          game { showGrid = not $ showGrid game }
-                    "r" -> -- Действия при нажатии на кнопку очистки поля
-                          game { board = HS.empty, paused = True }
-                    _   -> game  -- Действия для остальных кнопок, если такие будут добавлены
+                    case buttonSymbol of
+                        " " -> game { paused = not $ paused game }
+                        "g" -> game { showGrid = not $ showGrid game }
+                        "r" -> game { board = HS.empty, paused = True }
+                        _   -> game
+
 gameInteract (EventResize newScreenSize) game = game {screenSize = newScreenSize}
 gameInteract _ game = game
 
