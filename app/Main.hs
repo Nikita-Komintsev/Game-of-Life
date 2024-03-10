@@ -128,23 +128,22 @@ data Panel = Panel { panelWidth :: Float, panelHeight :: Float }
 newPanel :: Panel
 newPanel = Panel { panelWidth = fromIntegral $ fst defaultScreenSize, panelHeight = 150.0 }
 
--- TO DO
 -- Функция отрисовки панели
 drawPanel :: Panel -> (Int, Int) -> Picture
 drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, screenHeight) =
     pictures [ translate 0 (-halfHeight + height / 2) $ color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
-             , translate (-halfWidth + 10 + 80 * 2) (-halfHeight + height / 2 + 40) $ button " " "Старт / Стоп"
-             , translate (-halfWidth + 10 + 80 * 3) (-halfHeight + height / 2 + 40) $ button "g" "Показать сетку"
-             , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 + 40) $ button "r" "Очистить поле"
-             ]
+                 , translate (-halfWidth + 10 + 80 * 1) (-halfHeight + height / 2 + 40) $ button "Start"
+                 , translate (-halfWidth + 10 + 80 * 2) (-halfHeight + height / 2 + 40) $ button "Grid"
+                 , translate (-halfWidth + 10 + 80 * 3) (-halfHeight + height / 2 + 40) $ button "Reset"
+                 ]
     where halfHeight = fromIntegral screenHeight / 2.0
           halfWidth = fromIntegral screenWidth / 2.0
-          button :: String -> String -> Picture
-          button symbol text =
+          button :: String -> Picture
+          button text =
               pictures [ color (greyN 0.7) $ rectangleSolid 70 30
-                       , translate (-10) (-5) $ scale 0.1 0.1 $ color black $ Text symbol
-                       , translate (-40) (-10) $ scale 0.1 0.1 $ color black $ Text text
+                       , translate (-15) (-5) $ scale 0.1 0.1 $ color black $ Text text
                        ]
+
 
 
 -- отрисовка экземпляра игры
@@ -210,23 +209,25 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
         isPanelClick (xPos, yPos) = yPos < -halfHeight + panelHeight newPanel
         (width, height) = fromIntegral <$> screenSize game
         halfHeight = fromIntegral height / 2.0
+        halfWidth = fromIntegral width / 2.0
         -- Обработка нажатия на кнопки на панели
         processButtonClick :: Game -> (Float, Float) -> Game
         processButtonClick game (clickX, clickY)
-            | clickX <= (-halfWidth + 10 + 80 * 2) = handleButtonAction game " "  -- Нажата кнопка старт / стоп
-            | clickX <= (-halfWidth + 10 + 80 * 3) = handleButtonAction game "g"  -- Нажата кнопка показа сетки
-            | clickX <= (-halfWidth + 10 + 80 * 4) = handleButtonAction game "r"  -- Нажата кнопка очистки поля
+            | clickX >= (-halfWidth + 10 + 80 * 1 - 35)
+              && clickX <= (-halfWidth + 10 + 80 * 1 + 35) = handleButtonAction game "Start"  -- Нажата кнопка старт / стоп
+            | clickX >= (-halfWidth + 10 + 80 * 2 - 35) && clickX <= (-halfWidth + 10 + 80 * 2 + 35) = handleButtonAction game "g"  -- Нажата кнопка показа сетки
+            | clickX >= (-halfWidth + 10 + 80 * 3 - 35) && clickX <= (-halfWidth + 10 + 80 * 3 + 35) = handleButtonAction game "r"  -- Нажата кнопка очистки поля
             | otherwise = game  -- Нажатие было вне панели, игнорируем его
-            where
-                halfWidth = fromIntegral (fst (screenSize game)) / 2.0
-                halfHeight = fromIntegral (snd (screenSize game)) / 2.0
-                handleButtonAction :: Game -> String -> Game
-                handleButtonAction game buttonSymbol =
-                    case buttonSymbol of
-                        " " -> game { paused = not $ paused game }
-                        "g" -> game { showGrid = not $ showGrid game }
-                        "r" -> game { board = HS.empty, paused = True }
-                        _   -> game
+            where handleButtonAction :: Game -> String -> Game
+                  handleButtonAction game buttonSymbol =
+                      case buttonSymbol of
+                          "Start" -> game { paused = not $ paused game }
+                          "g" -> game { showGrid = not $ showGrid game }
+                          "r" -> game { board = HS.empty, paused = True }
+                          _   -> game
+                  (width, height) = fromIntegral <$> screenSize game
+                  halfHeight = fromIntegral height / 2.0
+                  halfWidth = fromIntegral width / 2.0
 
 gameInteract (EventResize newScreenSize) game = game {screenSize = newScreenSize}
 gameInteract _ game = game
