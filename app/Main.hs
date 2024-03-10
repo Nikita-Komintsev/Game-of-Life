@@ -213,10 +213,12 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
         -- Обработка нажатия на кнопки на панели
         processButtonClick :: Game -> (Float, Float) -> Game
         processButtonClick game (clickX, clickY)
-            | clickX >= (-halfWidth + 10 + 80 * 1 - 35)
-              && clickX <= (-halfWidth + 10 + 80 * 1 + 35) = handleButtonAction game "Start"  -- Нажата кнопка старт / стоп
-            | clickX >= (-halfWidth + 10 + 80 * 2 - 35) && clickX <= (-halfWidth + 10 + 80 * 2 + 35) = handleButtonAction game "g"  -- Нажата кнопка показа сетки
-            | clickX >= (-halfWidth + 10 + 80 * 3 - 35) && clickX <= (-halfWidth + 10 + 80 * 3 + 35) = handleButtonAction game "r"  -- Нажата кнопка очистки поля
+            | clickY >= (-halfHeight + 10 + 80 * 1 + 10) && clickY <= (-halfHeight + 10 + 80 * 1 + 40) =
+                    case clickX of
+                        _ | clickX >= (-halfWidth + 10 + 80 * 1 - 35) && clickX <= (-halfWidth + 10 + 80 * 1 + 35) -> handleButtonAction game "Start"  -- Нажата кнопка старт / стоп
+                          | clickX >= (-halfWidth + 10 + 80 * 2 - 35) && clickX <= (-halfWidth + 10 + 80 * 2 + 35) -> handleButtonAction game "g"  -- Нажата кнопка показа сетки
+                          | clickX >= (-halfWidth + 10 + 80 * 3 - 35) && clickX <= (-halfWidth + 10 + 80 * 3 + 35) -> handleButtonAction game "r"  -- Нажата кнопка очистки поля
+                          | otherwise -> game  -- Нажатие было вне панели, игнорируем его
             | otherwise = game  -- Нажатие было вне панели, игнорируем его
             where handleButtonAction :: Game -> String -> Game
                   handleButtonAction game buttonSymbol =
@@ -226,7 +228,7 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
                           "r" -> game { board = HS.empty, paused = True }
                           _   -> game
                   (width, height) = fromIntegral <$> screenSize game
-                  halfHeight = fromIntegral height / 2.0
+                  halfHeight =  height / 2.0
                   halfWidth = fromIntegral width / 2.0
 
 gameInteract (EventResize newScreenSize) game = game {screenSize = newScreenSize}
