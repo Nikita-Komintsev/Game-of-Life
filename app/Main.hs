@@ -14,6 +14,10 @@ type Cell = (Int, Int)
 --Любые ячейки, присутствующие в HashSet, живы, а все остальные мертвы.
 type Board = HashSet Cell
 
+initialBoard :: Configuration -> Board
+initialBoard Glider = HS.fromList [(1, 0), (2, 1), (0, 2), (1, 2), (2, 2)]
+initialBoard GliderGun = HS.fromList [(24,0),(22,1),(24,1),(12,2),(13,2),(20,2),(21,2),(34,2),(35,2),(11,3),(15,3),(20,3),(21,3),(34,3),(35,3),(0,4),(1,4),(10,4),(16,4),(20,4),(21,4),(0,5),(1,5),(10,5),(14,5),(16,5),(17,5),(22,5),(24,5),(10,6),(16,6),(24,6),(11,7),(15,7),(12,8),(13,8)]
+
 --один шаг обновления состояния игровой доски
 iterateBoard :: Board -> Board
 iterateBoard board = stepCells (HS.toList board) HS.empty
@@ -132,7 +136,7 @@ newPanel = Panel { panelWidth = fromIntegral $ fst defaultScreenSize, panelHeigh
 drawPanel :: Panel -> (Int, Int) -> Picture
 drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, screenHeight) =
     pictures [ translate 0 (-halfHeight + height / 2) $ color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
-                 , translate (-halfWidth + 10 + 80 * 1) (-halfHeight + height / 2 + 40) $ button "Start"
+                 , translate (-halfWidth + 10 + 80 * 1) (-halfHeight + height / 2 + 40) $ button "Play"
                  , translate (-halfWidth + 10 + 80 * 2) (-halfHeight + height / 2 + 40) $ button "Grid"
                  , translate (-halfWidth + 10 + 80 * 3) (-halfHeight + height / 2 + 40) $ button "Reset"
                  ]
@@ -239,7 +243,8 @@ data Game = Game { board      :: Board
                  , camera     :: Camera
                  , paused     :: Bool
                  , showGrid   :: Bool
-                 , screenSize :: (Int, Int)}
+                 , screenSize :: (Int, Int)
+                 }
 
 -- новая игра
 newGame :: Game
