@@ -17,8 +17,17 @@ type Board = HashSet Cell
 data Configuration = Glider | GliderGun
 
 initialBoard :: Configuration -> Board
-initialBoard Glider = HS.fromList [(1, 0), (2, 1), (0, 2), (1, 2), (2, 2)]
-initialBoard GliderGun = HS.fromList [(24,0),(22,1),(24,1),(12,2),(13,2),(20,2),(21,2),(34,2),(35,2),(11,3),(15,3),(20,3),(21,3),(34,3),(35,3),(0,4),(1,4),(10,4),(16,4),(20,4),(21,4),(0,5),(1,5),(10,5),(14,5),(16,5),(17,5),(22,5),(24,5),(10,6),(16,6),(24,6),(11,7),(15,7),(12,8),(13,8)]
+initialBoard Glider = HS.fromList [(0, 0), (1, 0), (2, 0), (2, 1), (1, 2)]
+initialBoard GliderGun = HS.fromList [(24,-4),(22,-3),(24,-3),(12,-2),(13,-2),(20,-2),(21,-2),(34,-2),(35,-2),(11,-1),(15,-1),(20,-1),(21,-1),(34,-1),(35,-1),(0,0),(1,0),(10,0),(16,0),(20,0),(21,0),(0,1),(1,1),(10,1),(14,1),(16,1),(17,1),(22,1),(24,1),(10,2),(16,2),(24,2),(11,3),(15,3),(12,4),(13,4)]
+
+-- Тип данных для представления выбора конфигурации
+data ConfigurationChoice = GliderChoice | GliderGunChoice deriving (Eq)
+
+-- Функция для добавления выбранной конфигурации на игровое поле
+addConfiguration :: ConfigurationChoice -> Cell -> Board -> Board
+addConfiguration GliderChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard Glider
+addConfiguration GliderGunChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGun
+
 
 --один шаг обновления состояния игровой доски
 iterateBoard :: Board -> Board
@@ -141,6 +150,12 @@ drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, scr
                  , translate (-halfWidth + 10 + 80 * 1) (-halfHeight + height / 2 + 40) $ button "Play"
                  , translate (-halfWidth + 10 + 80 * 2) (-halfHeight + height / 2 + 40) $ button "Grid"
                  , translate (-halfWidth + 10 + 80 * 3) (-halfHeight + height / 2 + 40) $ button "Reset"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 + 40) $ scale 0.1 0.1 $ color black $ Text "WASD - Move camera"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 + 20) $ scale 0.1 0.1 $ color black $ Text "(+)/(-) Zoom in/out"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2) $ scale 0.1 0.1 $ color black $ Text "(g) - Grid visibility"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(r) - Reset board"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 40) $ scale 0.1 0.1 $ color black $ Text "(1) - Select Glider configuration"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 60) $ scale 0.1 0.1 $ color black $ Text "(2) - Select GliderGun configuration"
                  ]
     where halfHeight = fromIntegral screenHeight / 2.0
           halfWidth = fromIntegral screenWidth / 2.0
@@ -181,6 +196,8 @@ gameInteract (EventKey (Char key) keyState _ _) game =
          '-' -> game {camera = gameCamera {deltaZoom = if keyState == Down then -zoomSpeed else 0.0}}
          'g' -> if keyState == Down then game {showGrid = not $ showGrid game} else game
          'r' -> if keyState == Down then game {board = HS.empty, paused = True} else game
+         '1' -> if keyState == Down then game {configChoice = Just GliderChoice} else game  -- Выбор конфигурации Glider
+         '2' -> if keyState == Down then game {configChoice = Just GliderGunChoice} else game  -- Выбор конфигурации GliderGun
          _   -> game
     where gameCamera :: Camera
           gameCamera = camera game
@@ -199,9 +216,12 @@ gameInteract (EventKey (SpecialKey key) keyState _ _) game =
 gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
   case mouseButton of
     LeftButton -> if not $ isPanelClick position
-                  then if not $ mouseToCellCoordinates `HS.member` board game
-                       then game { board = HS.insert mouseToCellCoordinates (board game) }
-                       else game { board = HS.delete mouseToCellCoordinates (board game) }
+                  then case configChoice game of
+                       Just choice -> game { board = addConfiguration choice mouseToCellCoordinates (board game)
+                           , configChoice = Nothing }  -- Добавляем выбранную конфигурацию на игровое поле и сбрасываем выбор
+                       Nothing -> if not $ mouseToCellCoordinates `HS.member` board game
+                           then game { board = HS.insert mouseToCellCoordinates (board game) }
+                           else game { board = HS.delete mouseToCellCoordinates (board game) }
                   else processButtonClick game position
     _          -> game
   where mouseToCellCoordinates :: Cell
@@ -246,6 +266,8 @@ data Game = Game { board      :: Board
                  , paused     :: Bool
                  , showGrid   :: Bool
                  , screenSize :: (Int, Int)
+                 , configChoice    :: Maybe ConfigurationChoice  -- Добавляем выбор конфигурации
+                 , configPosition  :: Maybe Cell                 -- Позиция выбранной конфигурации
                  }
 
 -- новая игра
@@ -257,6 +279,8 @@ newGame = Game { board  = HS.empty
                , paused = True
                , showGrid = True
                , screenSize = defaultScreenSize
+               , configChoice  = Nothing
+               , configPosition = Nothing
                }
 
 
