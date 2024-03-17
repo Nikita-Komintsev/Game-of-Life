@@ -14,19 +14,28 @@ type Cell = (Int, Int)
 --Любые ячейки, присутствующие в HashSet, живы, а все остальные мертвы.
 type Board = HashSet Cell
 
-data Configuration = Glider | GliderGun
+data Configuration = Glider | GliderGun | ForTest
 
 initialBoard :: Configuration -> Board
 initialBoard Glider = HS.fromList [(0, 0), (1, 0), (2, 0), (2, 1), (1, 2)]
 initialBoard GliderGun = HS.fromList [(24,-4),(22,-3),(24,-3),(12,-2),(13,-2),(20,-2),(21,-2),(34,-2),(35,-2),(11,-1),(15,-1),(20,-1),(21,-1),(34,-1),(35,-1),(0,0),(1,0),(10,0),(16,0),(20,0),(21,0),(0,1),(1,1),(10,1),(14,1),(16,1),(17,1),(22,1),(24,1),(10,2),(16,2),(24,2),(11,3),(15,3),(12,4),(13,4)]
+initialBoard ForTest = HS.fromList [(1, 7), (2, 7), (3, 7), (9, 7), (13, 7), (17, 7), (21, 7), (25, 7), (29, 7),
+                                                  (0, 6), (3, 6), (7, 6), (11, 6), (15, 6), (19, 6), (23, 6), (26, 6), (29, 6),
+                                                  (3, 5), (10, 5), (12, 5), (14, 5), (18, 5), (20, 5), (22, 5), (25, 5),
+                                                  (3, 4), (27, 4),
+                                                  (3, 3), (6, 3), (19, 3), (22, 3),
+                                                  (3, 2), (6, 2), (19, 2), (22, 2), (25, 2), (26, 2),
+                                                  (2, 1), (6, 1), (19, 1), (22, 1), (26, 1), (29, 1)]
+
 
 -- Тип данных для представления выбора конфигурации
-data ConfigurationChoice = GliderChoice | GliderGunChoice deriving (Eq)
+data ConfigurationChoice = GliderChoice | GliderGunChoice | ForTestChoice deriving (Eq)
 
 -- Функция для добавления выбранной конфигурации на игровое поле
 addConfiguration :: ConfigurationChoice -> Cell -> Board -> Board
 addConfiguration GliderChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard Glider
 addConfiguration GliderGunChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGun
+addConfiguration ForTestChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard ForTest
 
 
 --один шаг обновления состояния игровой доски
@@ -198,6 +207,7 @@ gameInteract (EventKey (Char key) keyState _ _) game =
          'r' -> if keyState == Down then game {board = HS.empty, paused = True} else game
          '1' -> if keyState == Down then game {configChoice = Just GliderChoice} else game  -- Выбор конфигурации Glider
          '2' -> if keyState == Down then game {configChoice = Just GliderGunChoice} else game  -- Выбор конфигурации GliderGun
+         '3' -> if keyState == Down then game {configChoice = Just ForTestChoice} else game
          _   -> game
     where gameCamera :: Camera
           gameCamera = camera game
