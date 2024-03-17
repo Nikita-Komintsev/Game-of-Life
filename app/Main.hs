@@ -14,22 +14,22 @@ type Cell = (Int, Int)
 --Любые ячейки, присутствующие в HashSet, живы, а все остальные мертвы.
 type Board = HashSet Cell
 
-data Configuration = Glider | GliderGun | ForTest
+data Configuration = Glider | GliderGun | GliderGun90
 
 initialBoard :: Configuration -> Board
 initialBoard Glider = HS.fromList [(0, 0), (1, 0), (2, 0), (2, 1), (1, 2)]
 initialBoard GliderGun = HS.fromList [(12,-3), (13,-3), (11,-2), (15,-2), (10,-1), (16,-1), (24,-1), (0,0), (1,0), (10,0), (14,0), (16,0), (17,0), (22,0), (24,0), (0,1), (1,1), (10,1), (16,1), (20,1), (21,1), (11,2), (15,2), (20,2), (21,2), (34,2), (35,2), (12,3), (13,3), (20,3), (21,3), (34,3), (35,3), (22,4), (24,4), (24,5)]
-initialBoard ForTest = HS.fromList []
+initialBoard GliderGun90 = HS.fromList [(0, 0), (1, 0), (0, 1), (1, 1), (0, 10), (1, 10), (2, 10), (-1, 11), (3, 11), (-2, 12), (4, 12), (-2, 13), (4, 13), (1, 14), (-1, 15), (3, 15), (0, 16), (1, 16), (2, 16), (1, 17), (-2, 20), (-1, 20), (0, 20), (-2, 21), (-1, 21), (0, 21), (-3, 22), (1, 22), (-4, 24), (-3, 24), (1, 24), (2, 24), (-2, 34), (-1, 34), (-2, 35), (-1, 35)]
 
 
 -- Тип данных для представления выбора конфигурации
-data ConfigurationChoice = GliderChoice | GliderGunChoice | ForTestChoice deriving (Eq)
+data ConfigurationChoice = GliderChoice | GliderGunChoice | GliderGun90Choice deriving (Eq)
 
 -- Функция для добавления выбранной конфигурации на игровое поле
 addConfiguration :: ConfigurationChoice -> Cell -> Board -> Board
 addConfiguration GliderChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard Glider
 addConfiguration GliderGunChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGun
-addConfiguration ForTestChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard ForTest
+addConfiguration GliderGun90Choice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGun90
 
 
 --один шаг обновления состояния игровой доски
@@ -157,8 +157,9 @@ drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, scr
                  , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 + 20) $ scale 0.1 0.1 $ color black $ Text "(+)/(-) Zoom in/out"
                  , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2) $ scale 0.1 0.1 $ color black $ Text "(g) - Grid visibility"
                  , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(r) - Reset board"
-                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 40) $ scale 0.1 0.1 $ color black $ Text "(1) - Select Glider configuration"
-                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 60) $ scale 0.1 0.1 $ color black $ Text "(2) - Select GliderGun configuration"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 40) $ scale 0.1 0.1 $ color black $ Text "(1) - Select Glider"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 60) $ scale 0.1 0.1 $ color black $ Text "(2) - Select GliderGun"
+                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 - 80) $ scale 0.1 0.1 $ color black $ Text "(3) - Select GliderGun rotate 90 deg"
                  ]
     where halfHeight = fromIntegral screenHeight / 2.0
           halfWidth = fromIntegral screenWidth / 2.0
@@ -201,7 +202,7 @@ gameInteract (EventKey (Char key) keyState _ _) game =
          'r' -> if keyState == Down then game {board = HS.empty, paused = True} else game
          '1' -> if keyState == Down then game {configChoice = Just GliderChoice} else game  -- Выбор конфигурации Glider
          '2' -> if keyState == Down then game {configChoice = Just GliderGunChoice} else game  -- Выбор конфигурации GliderGun
-         '3' -> if keyState == Down then game {configChoice = Just ForTestChoice} else game
+         '3' -> if keyState == Down then game {configChoice = Just GliderGun90Choice} else game
          _   -> game
     where gameCamera :: Camera
           gameCamera = camera game
