@@ -302,8 +302,8 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
                           "NOT Gate" -> game {configChoice = Just NOTGateChoice}
                           "AND Gate" -> game {configChoice = Just ANDGateChoice}
                           "OR Gate" -> game {configChoice = Just ORGateChoice}
-                          "+ speed" -> game {}
-                          "- speed" -> game {}
+                          "+ speed" -> game
+                          "- speed" -> game
                           _   -> game
                   (width, height) = fromIntegral <$> screenSize game
                   halfHeight =  height / 2.0
