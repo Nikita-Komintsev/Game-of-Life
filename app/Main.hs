@@ -14,13 +14,15 @@ type Cell = (Int, Int)
 --Любые ячейки, присутствующие в HashSet, живы, а все остальные мертвы.
 type Board = HashSet Cell
 
-data Configuration = Glider | GliderGun | GliderGun2| GliderGun90 | NOTGate | ANDGate | ORGate
+data Configuration = Glider | GliderGun | GliderGun2 | GliderGun90 | GliderGun902 | NOTGate | ANDGate | ORGate
 
 initialBoard :: Configuration -> Board
 initialBoard Glider = HS.fromList [(0, 0), (1, 0), (2, 0), (2, 1), (1, 2)]
 initialBoard GliderGun = HS.fromList [(12,-3), (13,-3), (11,-2), (15,-2), (10,-1), (16,-1), (24,-1), (0,0), (1,0), (10,0), (14,0), (16,0), (17,0), (22,0), (24,0), (0,1), (1,1), (10,1), (16,1), (20,1), (21,1), (11,2), (15,2), (20,2), (21,2), (34,2), (35,2), (12,3), (13,3), (20,3), (21,3), (34,3), (35,3), (22,4), (24,4), (24,5)]
 initialBoard GliderGun2 = HS.fromList [(-12,-3), (-13,-3), (-11,-2), (-15,-2), (-10,-1), (-16,-1), (-24,-1), (0,0), (-1,0), (-10,0), (-14,0), (-16,0), (-17,0), (-22,0), (-24,0), (0,1), (-1,1), (-10,1), (-16,1), (-20,1), (-21,1), (-11,2), (-15,2), (-20,2), (-21,2), (-34,2), (-35,2), (-12,3), (-13,3), (-20,3), (-21,3), (-34,3), (-35,3), (-22,4), (-24,4), (-24,5)]
 initialBoard GliderGun90 = HS.fromList [(0, 0), (1, 0), (0, 1), (1, 1), (0, 10), (1, 10), (2, 10), (-1, 11), (3, 11), (-2, 12), (4, 12), (-2, 13), (4, 13), (1, 14), (-1, 15), (3, 15), (0, 16), (1, 16), (2, 16), (1, 17), (-2, 20), (-1, 20), (0, 20), (-2, 21), (-1, 21), (0, 21), (-3, 22), (1, 22), (-4, 24), (-3, 24), (1, 24), (2, 24), (-2, 34), (-1, 34), (-2, 35), (-1, 35)]
+initialBoard GliderGun902 = HS.fromList [(0, 0), (-1, 0), (0, 1), (-1, 1), (0, 10), (-1, 10), (-2, 10), (1, 11), (-3, 11), (2, 12), (-4, 12), (2, 13), (-4, 13), (-1, 14), (1, 15), (-3, 15), (0, 16), (-1, 16), (-2, 16), (-1, 17), (2, 20), (1, 20), (0, 20), (2, 21), (1, 21), (0, 21), (3, 22), (-1, 22), (4, 24), (3, 24), (-1, 24), (-2, 24), (2, 34), (1, 34), (2, 35), (1, 35)]
+
 initialBoard NOTGate = HS.fromList [(12,-3), (13,-3), (11,-2), (15,-2), (10,-1), (16,-1), (24,-1), (0,0), (1,0), (10,0), (14,0), (16,0), (17,0), (22,0), (24,0), (0,1), (1,1), (10,1), (16,1), (20,1), (21,1), (11,2), (15,2), (20,2), (21,2), (34,2), (35,2), (12,3), (13,3), (20,3), (21,3), (34,3), (35,3), (22,4), (24,4), (24,5),
                                     (15, -48),  (16, -48),  (15, -47),  (16, -47),  (15, -38),  (16, -38),  (17, -38),  (14, -37),  (18, -37),  (13, -36),  (19, -36),  (13, -35),  (19, -35),  (16, -34),  (14, -33),  (18, -33),  (15, -32),  (16, -32),  (17, -32),  (16, -31),  (13, -28),  (14, -28),  (15, -28),  (13, -27),  (14, -27),  (15, -27),  (12, -26),  (16, -26),  (11, -24),  (12, -24),  (16, -24),  (17, -24),  (13, -14),  (14, -14),  (13, -13),  (14, -13),
                                     (23, 43), (24, 43), (23, 44), (24, 44), (23, 53), (24, 53), (25, 53), (22, 54), (26, 54), (21, 55), (27, 55), (21, 56), (27, 56), (24, 57), (22, 58), (26, 58), (23, 59), (24, 59), (25, 59), (24, 60), (21, 63), (22, 63), (23, 63), (21, 64), (22, 64), (23, 64), (20, 65), (24, 65), (19, 67), (20, 67), (24, 67), (25, 67), (21, 77), (22, 77), (21, 78), (22, 78),
@@ -28,11 +30,23 @@ initialBoard NOTGate = HS.fromList [(12,-3), (13,-3), (11,-2), (15,-2), (10,-1),
                                     (-83, 263), (-82, 263), (-83, 264), (-82, 264)]
 
 initialBoard ANDGate = HS.fromList [(12,-3), (13,-3), (11,-2), (15,-2), (10,-1), (16,-1), (24,-1), (0,0), (1,0), (10,0), (14,0), (16,0), (17,0), (22,0), (24,0), (0,1), (1,1), (10,1), (16,1), (20,1), (21,1), (11,2), (15,2), (20,2), (21,2), (34,2), (35,2), (12,3), (13,3), (20,3), (21,3), (34,3), (35,3), (22,4), (24,4), (24,5),
-                                   (282, -6), (281, -6), (283, -5), (279, -5), (284, -4), (278, -4), (270, -4), (294, -3), (293, -3), (284, -3), (280, -3), (278, -3), (277, -3), (272, -3), (270, -3), (294, -2), (293, -2), (284, -2), (278, -2), (274, -2), (273, -2), (283, -1), (279, -1), (274, -1), (273, -1), (260, -1), (259, -1), (282, 0), (281, 0), (274, 0), (273, 0), (260, 0), (259, 0), (272, 1), (270, 1), (270, 2)]
+                                   (282, -6), (281, -6), (283, -5), (279, -5), (284, -4), (278, -4), (270, -4), (294, -3), (293, -3), (284, -3), (280, -3), (278, -3), (277, -3), (272, -3), (270, -3), (294, -2), (293, -2), (284, -2), (278, -2), (274, -2), (273, -2), (283, -1), (279, -1), (274, -1), (273, -1), (260, -1), (259, -1), (282, 0), (281, 0), (274, 0), (273, 0), (260, 0), (259, 0), (272, 1), (270, 1), (270, 2),
+                                   (87, -152), (86, -152), (87, -151), (86, -151), (87, -142), (86, -142), (85, -142), (88, -141), (84, -141), (89, -140), (83, -140), (89, -139), (83, -139), (86, -138), (88, -137), (84, -137), (87, -136), (86, -136), (85, -136), (86, -135), (89, -132), (88, -132), (87, -132), (89, -131), (88, -131), (87, -131), (90, -130), (86, -130), (91, -128), (90, -128), (86, -128), (85, -128), (89, -118), (88, -118), (89, -117), (88, -117),
+                                   (-111, -34), (-110, -34), (-111, -33), (-110, -33), (-111, -24), (-110, -24), (-109, -24), (-112, -23), (-108, -23), (-113, -22), (-107, -22), (-113, -21), (-107, -21), (-110, -20), (-112, -19), (-108, -19), (-111, -18), (-110, -18), (-109, -18), (-110, -17), (-113, -14), (-112, -14), (-111, -14), (-113, -13), (-112, -13), (-111, -13), (-114, -12), (-110, -12), (-115, -10), (-114, -10), (-110, -10), (-109, -10), (-113, 0), (-112, 0), (-113, 1), (-112, 1),
+                                   (-138, 25), (-137, 25), (-138, 26), (-137, 26), (-138, 35), (-137, 35), (-136, 35), (-139, 36), (-135, 36), (-140, 37), (-134, 37), (-140, 38), (-134, 38), (-137, 39), (-139, 40), (-135, 40), (-138, 41), (-137, 41), (-136, 41), (-137, 42), (-140, 45), (-139, 45), (-138, 45), (-140, 46), (-139, 46), (-138, 46), (-141, 47), (-137, 47), (-142, 49), (-141, 49), (-137, 49), (-136, 49), (-140, 59), (-139, 59), (-140, 60), (-139, 60),
+                                   (-17, 210), (-16, 210), (-18, 211), (-14, 211), (-19, 212), (-13, 212), (-5, 212), (-29, 213), (-28, 213), (-19, 213), (-15, 213), (-13, 213), (-12, 213), (-7, 213), (-5, 213), (-29, 214), (-28, 214), (-19, 214), (-13, 214), (-9, 214), (-8, 214), (-18, 215), (-14, 215), (-9, 215), (-8, 215), (5, 215), (6, 215), (-17, 216), (-16, 216), (-9, 216), (-8, 216), (5, 216), (6, 216), (-7, 217), (-5, 217), (-5, 218),
+                                   (178, 137), (177, 137), (179, 138), (175, 138), (180, 139), (174, 139), (166, 139), (190, 140), (189, 140), (180, 140), (176, 140), (174, 140), (173, 140), (168, 140), (166, 140), (190, 141), (189, 141), (180, 141), (174, 141), (170, 141), (169, 141), (179, 142), (175, 142), (170, 142), (169, 142), (156, 142), (155, 142), (178, 143), (177, 143), (170, 143), (169, 143), (156, 143), (155, 143), (168, 144), (166, 144), (166, 145),
+                                   (53,22),(54,22),(54,23),(54,24),(55,25),(56,25),(56,24),
+                                   (-214, 235), (-213, 235), (-214, 236), (-213, 236),
+                                   (75, 169), (75, 170), (76, 169),(77, 170), (77,171), (77,172), (78,172),
+                                   (-124, -198), (-123, -198), (-124, -197), (-123, -197)]
+
+
+
 initialBoard ORGate = HS.fromList [(0,1),(1,1)]
 
 -- Тип данных для представления выбора конфигурации
-data ConfigurationChoice = GliderChoice | GliderGunChoice | GliderGunChoice2| GliderGun90Choice | NOTGateChoice | ANDGateChoice | ORGateChoice deriving (Eq)
+data ConfigurationChoice = GliderChoice | GliderGunChoice | GliderGunChoice2 | GliderGun90Choice| GliderGun90Choice2 | NOTGateChoice | ANDGateChoice | ORGateChoice deriving (Eq)
 
 -- Функция для добавления выбранной конфигурации на игровое поле
 addConfiguration :: ConfigurationChoice -> Cell -> Board -> Board
@@ -40,6 +54,7 @@ addConfiguration GliderChoice position board = HS.union board $ HS.map (\(x, y) 
 addConfiguration GliderGunChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGun
 addConfiguration GliderGunChoice2 position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGun2
 addConfiguration GliderGun90Choice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGun90
+addConfiguration GliderGun90Choice2 position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGun902
 addConfiguration NOTGateChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard NOTGate
 addConfiguration ANDGateChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard ANDGate
 addConfiguration ORGateChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard ORGate
@@ -173,10 +188,13 @@ drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, scr
                  , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 + 20) $ scale 0.1 0.1 $ color black $ Text "(+)/(-) Zoom in/out"
                  , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2) $ scale 0.1 0.1 $ color black $ Text "(g) - Grid visibility"
                  , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(r) - Reset board"
-                 , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 - 40) $ scale 0.1 0.1 $ color black $ Text "(1) - Select Glider"
-                 , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 - 60) $ scale 0.1 0.1 $ color black $ Text "(2) - Select GliderGun SW"
-                 , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 - 80) $ scale 0.1 0.1 $ color black $ Text "(3) - Select GliderGun rotate 90 deg"
-                 , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 - 80) $ scale 0.1 0.1 $ color black $ Text "(4) - Select GliderGun2 SE"
+                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 + 40) $ scale 0.1 0.1 $ color black $ Text "(1) - Select Glider"
+                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 + 20) $ scale 0.1 0.1 $ color black $ Text "(2) - Select GliderGun SE"
+                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 ) $ scale 0.1 0.1 $ color black $ Text "(3) - Select GliderGun NE"
+                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(4) - Select GliderGun SW"
+                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 - 40) $ scale 0.1 0.1 $ color black $ Text "(5) - Select GliderGun NW"
+                 , translate (-halfWidth + 10 + 80 * 13) (-halfHeight + height / 2 + 40) $ button "+ speed"
+                 , translate (-halfWidth + 10 + 80 * 14) (-halfHeight + height / 2 + 40) $ button "- speed"
                  ]
     where halfHeight = fromIntegral screenHeight / 2.0
           halfWidth = fromIntegral screenWidth / 2.0
@@ -221,6 +239,7 @@ gameInteract (EventKey (Char key) keyState _ _) game =
          '2' -> if keyState == Down then game {configChoice = Just GliderGunChoice} else game  -- Выбор конфигурации GliderGun
          '3' -> if keyState == Down then game {configChoice = Just GliderGun90Choice} else game
          '4' -> if keyState == Down then game {configChoice = Just GliderGunChoice2} else game
+         '5' -> if keyState == Down then game {configChoice = Just GliderGun90Choice2} else game
          _   -> game
     where gameCamera :: Camera
           gameCamera = camera game
@@ -270,6 +289,8 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
                           | clickX >= (-halfWidth + 10 + 80 * 4 - 35) && clickX <= (-halfWidth + 10 + 80 * 4 + 35) -> handleButtonAction game "NOT Gate"
                           | clickX >= (-halfWidth + 10 + 80 * 5 - 35) && clickX <= (-halfWidth + 10 + 80 * 5 + 35) -> handleButtonAction game "AND Gate"
                           | clickX >= (-halfWidth + 10 + 80 * 6 - 35) && clickX <= (-halfWidth + 10 + 80 * 6 + 35) -> handleButtonAction game "OR Gate"
+                          | clickX >= (-halfWidth + 10 + 80 * 13 - 35) && clickX <= (-halfWidth + 10 + 80 * 13 + 35) -> handleButtonAction game "+ speed"
+                          | clickX >= (-halfWidth + 10 + 80 * 14 - 35) && clickX <= (-halfWidth + 10 + 80 * 14 + 35) -> handleButtonAction game "- speed"
                           | otherwise -> game  -- Нажатие было вне панели, игнорируем его
             | otherwise = game  -- Нажатие было вне панели, игнорируем его
             where handleButtonAction :: Game -> String -> Game
@@ -281,6 +302,8 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
                           "NOT Gate" -> game {configChoice = Just NOTGateChoice}
                           "AND Gate" -> game {configChoice = Just ANDGateChoice}
                           "OR Gate" -> game {configChoice = Just ORGateChoice}
+                          "+ speed" -> game {}
+                          "- speed" -> game {}
                           _   -> game
                   (width, height) = fromIntegral <$> screenSize game
                   halfHeight =  height / 2.0
@@ -317,7 +340,7 @@ title :: String
 title = "Conway's game of life"
 
 defaultScreenSize :: (Int, Int)
-defaultScreenSize = (800, 600)
+defaultScreenSize = (1500, 800)
 
 backgroundColor :: Color
 backgroundColor = white
