@@ -193,8 +193,6 @@ drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, scr
                  , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 ) $ scale 0.1 0.1 $ color black $ Text "(3) - Select GliderGun NE"
                  , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(4) - Select GliderGun SW"
                  , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 - 40) $ scale 0.1 0.1 $ color black $ Text "(5) - Select GliderGun NW"
-                 , translate (-halfWidth + 10 + 80 * 13) (-halfHeight + height / 2 + 40) $ button "+ speed"
-                 , translate (-halfWidth + 10 + 80 * 14) (-halfHeight + height / 2 + 40) $ button "- speed"
                  ]
     where halfHeight = fromIntegral screenHeight / 2.0
           halfWidth = fromIntegral screenWidth / 2.0
@@ -283,14 +281,12 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
         processButtonClick game (clickX, clickY)
             | clickY >= (-halfHeight + 10 + 80 * 1 + 10) && clickY <= (-halfHeight + 10 + 80 * 1 + 40) =
                     case clickX of
-                        _ | clickX >= (-halfWidth + 10 + 80 * 1 - 35) && clickX <= (-halfWidth + 10 + 80 * 1 + 35) -> handleButtonAction game "Start"  -- Нажата кнопка старт / стоп
-                          | clickX >= (-halfWidth + 10 + 80 * 2 - 35) && clickX <= (-halfWidth + 10 + 80 * 2 + 35) -> handleButtonAction game "g"  -- Нажата кнопка показа сетки
-                          | clickX >= (-halfWidth + 10 + 80 * 3 - 35) && clickX <= (-halfWidth + 10 + 80 * 3 + 35) -> handleButtonAction game "r"  -- Нажата кнопка очистки поля
+                        _ | clickX >= (-halfWidth + 10 + 80 * 1 - 35) && clickX <= (-halfWidth + 10 + 80 * 1 + 35) -> handleButtonAction game "Start"
+                          | clickX >= (-halfWidth + 10 + 80 * 2 - 35) && clickX <= (-halfWidth + 10 + 80 * 2 + 35) -> handleButtonAction game "g"
+                          | clickX >= (-halfWidth + 10 + 80 * 3 - 35) && clickX <= (-halfWidth + 10 + 80 * 3 + 35) -> handleButtonAction game "r"
                           | clickX >= (-halfWidth + 10 + 80 * 4 - 35) && clickX <= (-halfWidth + 10 + 80 * 4 + 35) -> handleButtonAction game "NOT Gate"
                           | clickX >= (-halfWidth + 10 + 80 * 5 - 35) && clickX <= (-halfWidth + 10 + 80 * 5 + 35) -> handleButtonAction game "AND Gate"
                           | clickX >= (-halfWidth + 10 + 80 * 6 - 35) && clickX <= (-halfWidth + 10 + 80 * 6 + 35) -> handleButtonAction game "OR Gate"
-                          | clickX >= (-halfWidth + 10 + 80 * 13 - 35) && clickX <= (-halfWidth + 10 + 80 * 13 + 35) -> handleButtonAction game "+ speed"
-                          | clickX >= (-halfWidth + 10 + 80 * 14 - 35) && clickX <= (-halfWidth + 10 + 80 * 14 + 35) -> handleButtonAction game "- speed"
                           | otherwise -> game  -- Нажатие было вне панели, игнорируем его
             | otherwise = game  -- Нажатие было вне панели, игнорируем его
             where handleButtonAction :: Game -> String -> Game
@@ -302,8 +298,6 @@ gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
                           "NOT Gate" -> game {configChoice = Just NOTGateChoice}
                           "AND Gate" -> game {configChoice = Just ANDGateChoice}
                           "OR Gate" -> game {configChoice = Just ORGateChoice}
-                          "+ speed" -> game
-                          "- speed" -> game
                           _   -> game
                   (width, height) = fromIntegral <$> screenSize game
                   halfHeight =  height / 2.0
@@ -349,7 +343,7 @@ iterationsPerSecond :: Int
 iterationsPerSecond = 50
 
 moveSpeed :: Float
-moveSpeed = 120.0
+moveSpeed = 200.0
 
 zoomSpeed :: Float
 zoomSpeed = 1.0
@@ -361,3 +355,6 @@ main :: IO ()
 main = play (InWindow title defaultScreenSize (100, 100)) backgroundColor
             iterationsPerSecond newGame
             drawGame gameInteract iterateGame
+
+-- stack build
+-- stack run
