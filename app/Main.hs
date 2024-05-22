@@ -37,8 +37,7 @@ initialBoard ANDGate = HS.fromList [(0,0),(0,1),(1,0),(1,1),
                                     (-44, -54), (-44, -53), (-43, -54), (-43, -53)
                                     ]
 
-initialBoard ORGate = HS.fromList [(8,7),(8,8),(9,7),(9,8), -- start
-                                   -- NE
+initialBoard ORGate = HS.fromList [(8,7),(8,8),(9,7),(9,8),
                                   (-66, -70), (-65, -70), (-66, -69), (-65, -69),
                                   (-58, 7), (-57, 7), (-59, 8), (-55, 8), (-60, 9), (-54, 9), (-46, 9),(-70, 10), (-69, 10), (-60, 10), (-56, 10), (-54, 10), (-53, 10), (-48, 10),(-46, 10), (-70, 11), (-69, 11), (-60, 11), (-54, 11), (-50, 11), (-49, 11),(-59, 12), (-55, 12), (-50, 12), (-49, 12), (-36, 12), (-35, 12), (-58, 13),(-57, 13), (-50, 13), (-49, 13), (-36, 13), (-35, 13), (-48, 14), (-46, 14),(-46, 15),
                                   (52,-4),(52,-3),(53,-4),(53,-3),
@@ -88,9 +87,8 @@ iterateBoard board = stepCells (HS.toList board) HS.empty
                     possibleNeighbors :: [Cell]
                     possibleNeighbors = findPossibleNeighbors cell
                     findPossibleNeighbors :: Cell -> [Cell]
-                    findPossibleNeighbors cell = [(fst cell + dx, snd cell + dy) | dx <- [-1, 0, 1]
-                                                                                 , dy <- [-1, 0, 1]
-                                                                                 , (dx, dy) /= (0, 0)]
+                    findPossibleNeighbors cell = [(fst cell + dx, snd cell + dy) | dx <- [-1, 0, 1], dy <- [-1, 0, 1]
+                                                 , (dx, dy) /= (0, 0)]
 
 
 --обновления игрового состояния на основе прошедшего времени (deltaTime).
@@ -98,7 +96,8 @@ iterateGame :: Float -> Game -> Game
 iterateGame deltaTime game = game { board  = if not $ paused game then iterateBoard (board game) else board game
                                   , camera = gameCamera { x    = x gameCamera + scaledDeltaX
                                                         , y    = y gameCamera + scaledDeltaY
-                                                        , zoom = min zoomMaximum $ max nextZoom zoomMinimum}}
+                                                        , zoom = min zoomMaximum $ max nextZoom zoomMinimum}
+                                  }
     where gameCamera :: Camera
           gameCamera = camera game
 
@@ -119,15 +118,15 @@ iterateGame deltaTime game = game { board  = if not $ paused game then iterateBo
 -- визуализация игры
 data Camera = Camera { x :: Float,    deltaX :: Float
                      , y :: Float,    deltaY :: Float
-                     , zoom :: Float, deltaZoom :: Float}
+                     , zoom :: Float, deltaZoom :: Float
+                     }
 
 -- отрисовка ячеек
 drawCells :: Game -> Picture
 drawCells (Game {board = board, camera = camera}) =
     scale (zoom camera) (zoom camera) $ translate (-x camera) (-y camera) $
     scale cellSize cellSize $ pictures $
-        zipWith (uncurry translate) (L.map floatize $ HS.toList board)
-                                    (replicate (HS.size board) (translate (-0.5) (-0.5) $ rectangleSolid 1.0 1.0))
+        zipWith (uncurry translate) (L.map floatize $ HS.toList board) (replicate (HS.size board) (translate (-0.5) (-0.5) $ rectangleSolid 1.0 1.0))
     where floatize :: Cell -> (Float, Float)
           floatize (x, y) = (fromIntegral x, fromIntegral y)
 
@@ -135,13 +134,14 @@ drawCells (Game {board = board, camera = camera}) =
 drawGrid :: Game -> Picture
 drawGrid (Game {camera = camera, screenSize = screenSize}) = pictures
     [ translate (-halfHorizontal) horizontalCameraOffset $ pictures
-        [translate 0.0 offset line | line <- replicate horizontalLineCount $ Line [ (0.0, 0.0)
-                                                                                  , (horizontalLineSize, 0.0)]
-                                   | offset <- horizontalLineOffsets]
+        [translate 0.0 offset line | line <- replicate horizontalLineCount $ Line [ (0.0, 0.0), (horizontalLineSize, 0.0)]
+                                   | offset <- horizontalLineOffsets
+        ]
     , translate verticalCameraOffset (-halfVertical) $ pictures
-        [translate offset 0.0 line | line <- replicate verticalLineCount $ Line [ (0.0, 0.0)
-                                                                                , (0.0, verticalLineSize)]
-                                   | offset <- verticalLineOffsets]]
+        [translate offset 0.0 line | line <- replicate verticalLineCount $ Line [ (0.0, 0.0), (0.0, verticalLineSize)]
+                                   | offset <- verticalLineOffsets
+        ]
+    ]
     where horizontalLineSize :: Float
           horizontalLineSize = fromIntegral (fst screenSize)
           halfHorizontal :: Float
@@ -179,40 +179,38 @@ newPanel = Panel { panelWidth = fromIntegral $ fst defaultScreenSize, panelHeigh
 drawPanel :: Panel -> (Int, Int) -> Picture
 drawPanel (Panel { panelWidth = width, panelHeight = height }) (screenWidth, screenHeight) =
     pictures [ translate 0 (-halfHeight + height / 2) $ color (greyN 0.9) $ rectangleSolid (fromIntegral screenWidth) height
-                 , translate (-halfWidth + 10 + 80 * 1) (-halfHeight + height / 2 + 40) $ button "Play"
-                 , translate (-halfWidth + 10 + 80 * 2) (-halfHeight + height / 2 + 40) $ button "Grid"
-                 , translate (-halfWidth + 10 + 80 * 3) (-halfHeight + height / 2 + 40) $ button "Reset"
-                 , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 + 40) $ button "NOT Gate"
-                 , translate (-halfWidth + 10 + 80 * 5) (-halfHeight + height / 2 + 40) $ button "AND Gate"
-                 , translate (-halfWidth + 10 + 80 * 6) (-halfHeight + height / 2 + 40) $ button "OR Gate"
-                 , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 + 40) $ scale 0.1 0.1 $ color black $ Text "WASD - Move camera"
-                 , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 + 20) $ scale 0.1 0.1 $ color black $ Text "(+)/(-) Zoom in/out"
-                 , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2) $ scale 0.1 0.1 $ color black $ Text "(g) - Grid visibility"
-                 , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(r) - Reset board"
-                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 + 40) $ scale 0.1 0.1 $ color black $ Text "(1) - Select Glider"
-                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 + 20) $ scale 0.1 0.1 $ color black $ Text "(2) - Select GliderGun SE"
-                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 ) $ scale 0.1 0.1 $ color black $ Text "(3) - Select GliderGun NE"
-                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(4) - Select GliderGun SW"
-                 , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 - 40) $ scale 0.1 0.1 $ color black $ Text "(5) - Select GliderGun NW"
-                 ]
+             , translate (-halfWidth + 10 + 80 * 1) (-halfHeight + height / 2 + 40) $ button "Play"
+             , translate (-halfWidth + 10 + 80 * 2) (-halfHeight + height / 2 + 40) $ button "Grid"
+             , translate (-halfWidth + 10 + 80 * 3) (-halfHeight + height / 2 + 40) $ button "Reset"
+             , translate (-halfWidth + 10 + 80 * 4) (-halfHeight + height / 2 + 40) $ button "NOT Gate"
+             , translate (-halfWidth + 10 + 80 * 5) (-halfHeight + height / 2 + 40) $ button "AND Gate"
+             , translate (-halfWidth + 10 + 80 * 6) (-halfHeight + height / 2 + 40) $ button "OR Gate"
+             , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 + 40) $ scale 0.1 0.1 $ color black $ Text "WASD - Move camera"
+             , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 + 20) $ scale 0.1 0.1 $ color black $ Text "(+)/(-) Zoom in/out"
+             , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2) $ scale 0.1 0.1 $ color black $ Text "(g) - Grid visibility"
+             , translate (-halfWidth + 10 + 80 * 7) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(r) - Reset board"
+             , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 + 40) $ scale 0.1 0.1 $ color black $ Text "(1) - Select Glider"
+             , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 + 20) $ scale 0.1 0.1 $ color black $ Text "(2) - Select GliderGun SE"
+             , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 ) $ scale 0.1 0.1 $ color black $ Text "(3) - Select GliderGun NE"
+             , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 - 20) $ scale 0.1 0.1 $ color black $ Text "(4) - Select GliderGun SW"
+             , translate (-halfWidth + 10 + 80 * 10) (-halfHeight + height / 2 - 40) $ scale 0.1 0.1 $ color black $ Text "(5) - Select GliderGun NW"
+             ]
     where halfHeight = fromIntegral screenHeight / 2.0
           halfWidth = fromIntegral screenWidth / 2.0
           button :: String -> Picture
-          button text =
-              pictures [ color (greyN 0.7) $ rectangleSolid 70 30
-                       , translate (-30) (-5) $ scale 0.1 0.1 $ color black $ Text text
-                       ]
-
+          button text = pictures [ color (greyN 0.7) $ rectangleSolid 70 30
+                                 , translate (-30) (-5) $ scale 0.1 0.1 $ color black $ Text text
+                                 ]
 
 
 -- отрисовка экземпляра игры
 drawGame :: Game -> Picture
 drawGame game =
     pictures [ color black $ drawCells game
-                , if showGrid game then color black $ drawGrid game else Blank
-                , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
-                , drawPanel newPanel (screenSize game)
-                ]
+              , if showGrid game then color black $ drawGrid game else Blank
+              , translate (-halfWidth + 10) (halfHeight - 40) $ scale 0.25 0.25 $ color red  $ text gameStateText
+              , drawPanel newPanel (screenSize game)
+              ]
     where gameStateText = case paused game of
                              False -> ""
                              True  -> "Pause"
@@ -232,8 +230,8 @@ gameInteract (EventKey (Char key) keyState _ _) game =
          'd' -> game {camera = gameCamera {deltaX    = if keyState == Down then  moveSpeed else 0.0}}
          '+' -> game {camera = gameCamera {deltaZoom = if keyState == Down then  zoomSpeed else 0.0}}
          '-' -> game {camera = gameCamera {deltaZoom = if keyState == Down then -zoomSpeed else 0.0}}
-         'g' -> if keyState == Down then game {showGrid = not $ showGrid game} else game
-         'r' -> if keyState == Down then game {board = HS.empty, paused = True} else game
+         'g' -> if keyState == Down then game {showGrid     = not $ showGrid game} else game
+         'r' -> if keyState == Down then game {board        = HS.empty, paused = True} else game
          '1' -> if keyState == Down then game {configChoice = Just GliderChoice} else game
          '2' -> if keyState == Down then game {configChoice = Just GliderGunSEChoice} else game
          '3' -> if keyState == Down then game {configChoice = Just GliderGunNEChoice} else game
@@ -255,54 +253,54 @@ gameInteract (EventKey (SpecialKey key) keyState _ _) game =
     where gameCamera :: Camera
           gameCamera = camera game
 gameInteract (EventKey (MouseButton mouseButton) Down _ position) game =
-  case mouseButton of
-    LeftButton -> if not $ isPanelClick position
-                  then case configChoice game of
-                       Just choice -> game { board = addConfiguration choice mouseToCellCoordinates (board game)
-                           , configChoice = Nothing }  -- Добавляем выбранную конфигурацию на игровое поле и сбрасываем выбор
-                       Nothing -> if not $ mouseToCellCoordinates `HS.member` board game
-                           then game { board = HS.insert mouseToCellCoordinates (board game) }
-                           else game { board = HS.delete mouseToCellCoordinates (board game) }
-                  else processButtonClick game position
-    _          -> game
-  where mouseToCellCoordinates :: Cell
-        mouseToCellCoordinates =
-          ( floor $ (fst position / zoom gameCamera + x gameCamera) / cellSize + 1.0
-          , floor $ (snd position / zoom gameCamera + y gameCamera) / cellSize + 1.0)
+    case mouseButton of
+        LeftButton -> if not $ isPanelClick position
+                      then case configChoice game of
+                           Just choice -> game { board = addConfiguration choice mouseToCellCoordinates (board game)
+                               , configChoice = Nothing }  -- Добавляем выбранную конфигурацию на игровое поле и сбрасываем выбор
+                           Nothing -> if not $ mouseToCellCoordinates `HS.member` board game
+                               then game { board = HS.insert mouseToCellCoordinates (board game) }
+                               else game { board = HS.delete mouseToCellCoordinates (board game) }
+                      else processButtonClick game position
+        _          -> game
+    where mouseToCellCoordinates :: Cell
+          mouseToCellCoordinates =
+              ( floor $ (fst position / zoom gameCamera + x gameCamera) / cellSize + 1.0
+              , floor $ (snd position / zoom gameCamera + y gameCamera) / cellSize + 1.0)
 
-        gameCamera :: Camera
-        gameCamera = camera game
-        isPanelClick :: (Float, Float) -> Bool
-        isPanelClick (xPos, yPos) = yPos < -halfHeight + panelHeight newPanel
-        (width, height) = fromIntegral <$> screenSize game
-        halfHeight = fromIntegral height / 2.0
-        halfWidth = fromIntegral width / 2.0
-        -- Обработка нажатия на кнопки на панели
-        processButtonClick :: Game -> (Float, Float) -> Game
-        processButtonClick game (clickX, clickY)
-            | clickY >= (-halfHeight + 10 + 80 * 1 + 10) && clickY <= (-halfHeight + 10 + 80 * 1 + 40) =
-                    case clickX of
-                        _ | clickX >= (-halfWidth + 10 + 80 * 1 - 35) && clickX <= (-halfWidth + 10 + 80 * 1 + 35) -> handleButtonAction game "Start"
-                          | clickX >= (-halfWidth + 10 + 80 * 2 - 35) && clickX <= (-halfWidth + 10 + 80 * 2 + 35) -> handleButtonAction game "g"
-                          | clickX >= (-halfWidth + 10 + 80 * 3 - 35) && clickX <= (-halfWidth + 10 + 80 * 3 + 35) -> handleButtonAction game "r"
-                          | clickX >= (-halfWidth + 10 + 80 * 4 - 35) && clickX <= (-halfWidth + 10 + 80 * 4 + 35) -> handleButtonAction game "NOT Gate"
-                          | clickX >= (-halfWidth + 10 + 80 * 5 - 35) && clickX <= (-halfWidth + 10 + 80 * 5 + 35) -> handleButtonAction game "AND Gate"
-                          | clickX >= (-halfWidth + 10 + 80 * 6 - 35) && clickX <= (-halfWidth + 10 + 80 * 6 + 35) -> handleButtonAction game "OR Gate"
-                          | otherwise -> game  -- Нажатие было вне панели, игнорируем его
-            | otherwise = game  -- Нажатие было вне панели, игнорируем его
-            where handleButtonAction :: Game -> String -> Game
-                  handleButtonAction game buttonSymbol =
-                      case buttonSymbol of
-                          "Start" -> game { paused = not $ paused game }
-                          "g" -> game { showGrid = not $ showGrid game }
-                          "r" -> game { board = HS.empty, paused = True }
-                          "NOT Gate" -> game {configChoice = Just NOTGateChoice}
-                          "AND Gate" -> game {configChoice = Just ANDGateChoice}
-                          "OR Gate" -> game {configChoice = Just ORGateChoice}
-                          _   -> game
-                  (width, height) = fromIntegral <$> screenSize game
-                  halfHeight =  height / 2.0
-                  halfWidth = fromIntegral width / 2.0
+          gameCamera :: Camera
+          gameCamera = camera game
+          isPanelClick :: (Float, Float) -> Bool
+          isPanelClick (xPos, yPos) = yPos < -halfHeight + panelHeight newPanel
+          (width, height) = fromIntegral <$> screenSize game
+          halfHeight = fromIntegral height / 2.0
+          halfWidth = fromIntegral width / 2.0
+          -- Обработка нажатия на кнопки на панели
+          processButtonClick :: Game -> (Float, Float) -> Game
+          processButtonClick game (clickX, clickY)
+              | clickY >= (-halfHeight + 10 + 80 * 1 + 10) && clickY <= (-halfHeight + 10 + 80 * 1 + 40) =
+                  case clickX of
+                      _ | clickX >= (-halfWidth + 10 + 80 * 1 - 35) && clickX <= (-halfWidth + 10 + 80 * 1 + 35) -> handleButtonAction game "Start"
+                        | clickX >= (-halfWidth + 10 + 80 * 2 - 35) && clickX <= (-halfWidth + 10 + 80 * 2 + 35) -> handleButtonAction game "g"
+                        | clickX >= (-halfWidth + 10 + 80 * 3 - 35) && clickX <= (-halfWidth + 10 + 80 * 3 + 35) -> handleButtonAction game "r"
+                        | clickX >= (-halfWidth + 10 + 80 * 4 - 35) && clickX <= (-halfWidth + 10 + 80 * 4 + 35) -> handleButtonAction game "NOT Gate"
+                        | clickX >= (-halfWidth + 10 + 80 * 5 - 35) && clickX <= (-halfWidth + 10 + 80 * 5 + 35) -> handleButtonAction game "AND Gate"
+                        | clickX >= (-halfWidth + 10 + 80 * 6 - 35) && clickX <= (-halfWidth + 10 + 80 * 6 + 35) -> handleButtonAction game "OR Gate"
+                        | otherwise -> game  -- Нажатие было вне панели, игнорируем его
+              | otherwise = game  -- Нажатие было вне панели, игнорируем его
+              where handleButtonAction :: Game -> String -> Game
+                    handleButtonAction game buttonSymbol =
+                        case buttonSymbol of
+                            "Start" -> game { paused = not $ paused game }
+                            "g" -> game { showGrid = not $ showGrid game }
+                            "r" -> game { board = HS.empty, paused = True }
+                            "NOT Gate" -> game {configChoice = Just NOTGateChoice}
+                            "AND Gate" -> game {configChoice = Just ANDGateChoice}
+                            "OR Gate" -> game {configChoice = Just ORGateChoice}
+                            _   -> game
+                    (width, height) = fromIntegral <$> screenSize game
+                    halfHeight =  height / 2.0
+                    halfWidth = fromIntegral width / 2.0
 
 gameInteract (EventResize newScreenSize) game = game {screenSize = newScreenSize}
 gameInteract _ game = game
@@ -313,8 +311,8 @@ data Game = Game { board      :: Board
                  , paused     :: Bool
                  , showGrid   :: Bool
                  , screenSize :: (Int, Int)
-                 , configChoice    :: Maybe ConfigurationChoice  -- Добавляем выбор конфигурации
-                 , configPosition  :: Maybe Cell                 -- Позиция выбранной конфигурации
+                 , configChoice    :: Maybe ConfigurationChoice
+                 , configPosition  :: Maybe Cell
                  }
 
 -- новая игра
@@ -353,9 +351,7 @@ cellSize :: Float
 cellSize = 10.0
 
 main :: IO ()
-main = play (InWindow title defaultScreenSize (100, 100)) backgroundColor
-            iterationsPerSecond newGame
-            drawGame gameInteract iterateGame
+main = play (InWindow title defaultScreenSize (1500, 800)) backgroundColor iterationsPerSecond newGame drawGame gameInteract iterateGame
 
 -- stack build
 -- stack run
