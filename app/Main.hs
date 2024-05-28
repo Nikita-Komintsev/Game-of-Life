@@ -1,13 +1,10 @@
 {-# LANGUAGE ParallelListComp #-}
 
 module Main (main) where
-import Graphics.Gloss
-import Graphics.Gloss.Interface.IO.Interact
 import Data.List as L
 import Data.Fixed
 import Data.HashSet as HS
 import Graphics.Gloss.Interface.Pure.Game
-import Graphics.Gloss.Data.Point
 
 --ячейка на доске
 type Cell = (Int, Int)
@@ -46,7 +43,7 @@ initialBoard ORGate = HS.fromList [(8,7),(8,8),(9,7),(9,8),
 
 
 -- Тип данных для представления выбора конфигурации
-data ConfigurationChoice = GliderChoice | GliderGunSEChoice | GliderGunSWChoice | GliderGunNEChoice| GliderGunNWChoice | NOTGateChoice | ANDGateChoice | ORGateChoice deriving (Eq)
+data ConfigurationChoice = GliderChoice | GliderGunSEChoice | GliderGunSWChoice | GliderGunNEChoice| GliderGunNWChoice | NOTGateChoice | ANDGateChoice | ORGateChoice
 
 -- Функция для добавления выбранной конфигурации на игровое поле
 addConfiguration :: ConfigurationChoice -> Cell -> Board -> Board
