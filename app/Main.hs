@@ -47,14 +47,17 @@ data ConfigurationChoice = GliderChoice | GliderGunSEChoice | GliderGunSWChoice 
 
 -- Функция для добавления выбранной конфигурации на игровое поле
 addConfiguration :: ConfigurationChoice -> Cell -> Board -> Board
-addConfiguration GliderChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard Glider
-addConfiguration GliderGunSEChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGunSE
-addConfiguration GliderGunSWChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGunSW
-addConfiguration GliderGunNEChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGunNE
-addConfiguration GliderGunNWChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard GliderGunNW
-addConfiguration NOTGateChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard NOTGate
-addConfiguration ANDGateChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard ANDGate
-addConfiguration ORGateChoice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoard ORGate
+addConfiguration choice position board = HS.union board $ HS.map (\(x, y) -> (x + fst position, y + snd position)) $ initialBoardForChoice choice
+
+initialBoardForChoice :: ConfigurationChoice -> Board
+initialBoardForChoice GliderChoice = initialBoard Glider
+initialBoardForChoice GliderGunSEChoice = initialBoard GliderGunSE
+initialBoardForChoice GliderGunSWChoice = initialBoard GliderGunSW
+initialBoardForChoice GliderGunNEChoice = initialBoard GliderGunNE
+initialBoardForChoice GliderGunNWChoice = initialBoard GliderGunNW
+initialBoardForChoice NOTGateChoice = initialBoard NOTGate
+initialBoardForChoice ANDGateChoice = initialBoard ANDGate
+initialBoardForChoice ORGateChoice = initialBoard ORGate
 
 
 --один шаг обновления состояния игровой доски
