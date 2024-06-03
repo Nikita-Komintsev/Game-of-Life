@@ -11,7 +11,14 @@ type Cell = (Int, Int)
 --Любые ячейки, присутствующие в HashSet, живы, а все остальные мертвы.
 type Board = HashSet Cell
 
-data Configuration = Glider | GliderGunSE | GliderGunSW | GliderGunNE | GliderGunNW | NOTGate | ANDGate | ORGate
+data Configuration = Glider
+                  | GliderGunSE
+                  | GliderGunSW
+                  | GliderGunNE
+                  | GliderGunNW
+                  | NOTGate
+                  | ANDGate
+                  | ORGate
 
 initialBoard :: Configuration -> Board
 initialBoard Glider = HS.fromList [(0, 0), (1, 0), (2, 0), (2, 1), (1, 2)]
@@ -43,7 +50,14 @@ initialBoard ORGate = HS.fromList [(8,7),(8,8),(9,7),(9,8),
 
 
 -- Тип данных для представления выбора конфигурации
-data ConfigurationChoice = GliderChoice | GliderGunSEChoice | GliderGunSWChoice | GliderGunNEChoice| GliderGunNWChoice | NOTGateChoice | ANDGateChoice | ORGateChoice
+data ConfigurationChoice = GliderChoice
+                          | GliderGunSEChoice
+                          | GliderGunSWChoice
+                          | GliderGunNEChoice
+                          | GliderGunNWChoice
+                          | NOTGateChoice
+                          | ANDGateChoice
+                          | ORGateChoice
 
 -- Функция для добавления выбранной конфигурации на игровое поле
 addConfiguration :: ConfigurationChoice -> Cell -> Board -> Board
